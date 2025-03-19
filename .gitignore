@@ -1,0 +1,33 @@
+# Ignore the .env file containing secrets
+.env
+
+# Ignore compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.o
+
+# Ignore Go build artifacts
+/bin/
+/pkg/
+/build/
+
+# Ignore IDE and editor files
+.vscode/
+.idea/
+*.iml
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore logs and debug files
+*.log
+*.test
+
+# Ignore temporary files
+*.swp
+*.swo
+*.bak
+*.tmp

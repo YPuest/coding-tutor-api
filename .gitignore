@@ -31,3 +31,6 @@
 *.swo
 *.bak
 *.tmp
+
+# SQLite databse file
+tutor.db

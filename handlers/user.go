@@ -68,18 +68,25 @@ func GetUserStats(c *gin.Context) {
 	var stats models.Stats
 
 	err := database.DB.Get(&stats, `
-		SELECT
-			AVG(solutions.mark) as avg_mark,
-			AVG(solutions.ai_usage) * 100 as ai_usage_rate,
-			COUNT(tasks.id) as total_tasks,
-			SUM(CASE WHEN solutions.mark IS NOT NULL THEN 1 ELSE 0 END) as completed_tasks,
-			(SELECT '{' || GROUP_CONCAT('"' || language || '": ' || task_count) || '}'
-			 FROM (SELECT language, COUNT(*) as task_count
-				   FROM tasks WHERE user_id = ? GROUP BY language)
-			) as language_usage
+		SELECT 
+			COALESCE(AVG(solutions.mark), 0) AS avg_mark,
+			(COUNT(CASE WHEN solutions.ai_usage > 0 THEN 1 END) * 100.0 / 
+			 COUNT(CASE WHEN solutions.task_id IS NOT NULL THEN 1 END)) AS ai_usage_rate,
+			COUNT(tasks.id) AS total_tasks,
+			SUM(CASE WHEN solutions.task_id IS NOT NULL THEN 1 ELSE 0 END) AS completed_tasks,
+			(
+				SELECT '{' || GROUP_CONCAT('"' || language || '": ' || task_count) || '}'
+			 	FROM 
+			 	    (
+			 	    	SELECT language, COUNT(*) AS task_count
+				   		FROM tasks 
+				   		WHERE user_id = ? 
+				   		GROUP BY language
+					)
+			) AS language_usage
 		FROM tasks
 			LEFT JOIN solutions ON tasks.id = solutions.task_id
-		WHERE tasks.user_id = ?;`, userID, userID)
+		WHERE tasks.user_id = ?`, userID, userID)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Abrufen der Statistiken"})
@@ -95,14 +102,15 @@ func GetUserStatsFull(c *gin.Context) {
 	var stats models.StatsFull
 
 	err := database.DB.QueryRow(`
-        SELECT 
-            COALESCE(AVG(solutions.mark), 0) as avg_mark,
-            COALESCE(AVG(solutions.ai_usage) * 100, 0) as ai_usage_rate,
-            COUNT(tasks.id) as total_tasks,
-            SUM(CASE WHEN solutions.mark IS NOT NULL THEN 1 ELSE 0 END) as completed_tasks
-        FROM tasks
-        LEFT JOIN solutions ON tasks.id = solutions.task_id
-        WHERE tasks.user_id = ?`, userID).Scan(
+       	SELECT 
+			COALESCE(AVG(solutions.mark), 0) AS avg_mark,
+			(COUNT(CASE WHEN solutions.ai_usage > 0 THEN 1 END) * 100.0 / 
+			 COUNT(CASE WHEN solutions.task_id IS NOT NULL THEN 1 END)) AS ai_usage_rate,
+			COUNT(tasks.id) AS total_tasks,
+			SUM(CASE WHEN solutions.task_id IS NOT NULL THEN 1 ELSE 0 END) AS completed_tasks
+		FROM tasks
+			LEFT JOIN solutions ON tasks.id = solutions.task_id
+		WHERE tasks.user_id = ?`, userID).Scan(
 		&stats.AvgMark, &stats.AIUsageRate, &stats.TotalTasks, &stats.CompletedTasks,
 	)
 
@@ -114,7 +122,7 @@ func GetUserStatsFull(c *gin.Context) {
 
 	rows, err := database.DB.Query(`
         SELECT language, COUNT(*) 
-        FROM tasks 
+        FROM tasks
         WHERE user_id = ? 
         GROUP BY language`, userID)
 
@@ -193,13 +201,20 @@ func GetUserStatsLanguage(c *gin.Context) {
 
 	err := database.DB.QueryRow(`
 		SELECT 
-			COUNT(tasks.id) as total_tasks, 
-			COUNT(solutions.id) as completed_tasks, 
-			AVG(solutions.mark) as avg_mark
+			(
+				SELECT COUNT(*) 
+				FROM tasks 
+				WHERE tasks.language = ? 
+				  AND tasks.user_id = ?
+			) AS total_tasks,
+			COUNT(solutions.id) AS completed_tasks,
+			COALESCE(AVG(solutions.mark), 0) AS avg_mark
 		FROM tasks
-		LEFT JOIN solutions ON tasks.id = solutions.task_id
-		WHERE tasks.language = ? AND tasks.user_id = ?`,
-		language, userID).Scan(&stats.TotalTasks, &stats.CompletedTasks, &stats.AvgMark)
+			LEFT JOIN solutions ON tasks.id = solutions.task_id
+		WHERE tasks.language = ? 
+			AND tasks.user_id = ?
+			AND solutions.task_id IS NOT NULL`,
+		language, userID, language, userID).Scan(&stats.TotalTasks, &stats.CompletedTasks, &stats.AvgMark)
 
 	if err != nil {
 		log.Printf("DB Error: %v", err)
@@ -209,11 +224,13 @@ func GetUserStatsLanguage(c *gin.Context) {
 
 	err = database.DB.QueryRow(`
 		SELECT 
-			COUNT(CASE WHEN solutions.ai_usage > 0 THEN 1 END) as ai_with_usage,
-			COUNT(CASE WHEN solutions.ai_usage = 0 OR solutions.ai_usage IS NULL THEN 1 END) as ai_without_usage
+			COUNT(CASE WHEN solutions.ai_usage > 0 THEN 1 END) AS ai_with_usage,
+			COUNT(CASE WHEN solutions.ai_usage = 0 THEN 1 END) AS ai_without_usage
 		FROM tasks
-		LEFT JOIN solutions ON tasks.id = solutions.task_id
-		WHERE tasks.language = ? AND tasks.user_id = ?`,
+			LEFT JOIN solutions ON tasks.id = solutions.task_id
+		WHERE tasks.language = ? 
+			AND tasks.user_id = ?
+			AND solutions.task_id IS NOT NULL;`,
 		language, userID).Scan(&stats.AIWithUsage, &stats.AIWithoutUsage)
 
 	if err != nil {

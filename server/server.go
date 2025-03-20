@@ -13,7 +13,9 @@ func NewServer() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:5173"},
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"https://coding-tutor-app.vercel.app/"},
 		AllowMethods: []string{
 			"GET",
 			"POST",

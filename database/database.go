@@ -2,6 +2,7 @@ package database
 
 import (
 	"log"
+	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -10,10 +11,20 @@ import (
 var DB *sqlx.DB
 
 func InitDB() {
+	var dbPath string
+
+	if _, err := os.Stat("/data"); err == nil {
+		dbPath = "/data/tutor.db"
+		log.Println("Running on Render, using database:", dbPath)
+	} else {
+		dbPath = "tutor.db"
+		log.Println("Running locally, using database:", dbPath)
+	}
+
 	var err error
-	DB, err = sqlx.Connect("sqlite3", "./tutor.db")
+	DB, err = sqlx.Connect("sqlite3", dbPath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
 	schema := `

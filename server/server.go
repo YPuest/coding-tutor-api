@@ -4,6 +4,7 @@ import (
 	"api-test/handlers"
 	"github.com/gin-contrib/cors"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -66,7 +67,13 @@ func NewServer() {
 		}
 	}
 
-	err := r.Run(":8888")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Starting server on port %s...", port)
+	err := r.Run(":" + port)
 	if err != nil {
 		log.Fatal(err)
 	}

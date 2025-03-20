@@ -14,8 +14,11 @@ func InitDB() {
 	dbPath := "/data/tutor.db"
 
 	if _, err := os.Stat("/data"); os.IsNotExist(err) {
-		log.Println("Persistent storage (/data) not found, using local database...")
-		dbPath = "tutor.db"
+		log.Println("Persistent storage (/data) not found, creating directory...")
+		if err := os.MkdirAll("/data", 0755); err != nil {
+			log.Fatalf("Failed to create /data directory: %v", err)
+		}
+		log.Println("Using persistent database:", dbPath)
 	} else {
 		log.Println("Using persistent database:", dbPath)
 	}

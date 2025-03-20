@@ -11,14 +11,13 @@ import (
 var DB *sqlx.DB
 
 func InitDB() {
-	var dbPath string
+	dbPath := "/data/tutor.db"
 
-	if _, err := os.Stat("/data"); err == nil {
-		dbPath = "/data/tutor.db"
-		log.Println("Running on Render, using database:", dbPath)
-	} else {
+	if _, err := os.Stat("/data"); os.IsNotExist(err) {
+		log.Println("Persistent storage (/data) not found, using local database...")
 		dbPath = "tutor.db"
-		log.Println("Running locally, using database:", dbPath)
+	} else {
+		log.Println("Using persistent database:", dbPath)
 	}
 
 	var err error

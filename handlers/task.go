@@ -129,14 +129,14 @@ Return Format:
 - Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz. Bitte beachte dabei auch ob KI genutzt wurde.
 - Vergib eine Schulnote von 1,0 (sehr gut) bis 6,0 (ungenüngend). Schritte von 0,1 sind möglich.
 - Vergleich zwischen geschätzter Zeit und benötigter Zeit (realistisch, zu schnell, zu langsam).
-- Eine generierte Lösung.
+- Generiere eine mögliche und gültige Lösung die als Code ausführbar ist.
 - Gib keine Code-Fences an.
 - Exaktes JSON-Format (zwingend im JSON-Format, keine illegalen Zeichen, keinerlei zusätzlichen Text!):
 {
   "rating": "<Bewertung>",
   "mark": "<Schulnote: x,y>",
   "time_comparison": <Vergleich der Zeiten>,
-  "code": <generierte Lösung>
+  "solution": <generierte Lösung>
 }
 
 Warnings:
@@ -158,6 +158,8 @@ Context Dump:
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler bei KI-Anfrage"})
 		return
 	}
+
+	log.Println(response)
 
 	jsonString, err := CleanAndExtractJSON(response)
 	if err != nil {

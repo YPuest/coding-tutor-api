@@ -35,4 +35,5 @@ type TaskEvaluation struct {
 	Rating         string `json:"rating"`
 	Mark           string `json:"mark"`
 	TimeComparison string `json:"time_comparison"`
+	Solution       string `json:"solution"`
 }

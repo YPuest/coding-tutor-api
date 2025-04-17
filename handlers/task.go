@@ -38,6 +38,8 @@ Return Format:
 
 Warnings:
 - Stelle sicher, dass die Aufgabe nur mit Standardbibliotheken lösbar ist.
+- Stelle sicher, dass die Aufgabe in einer einzigen Date lösbar ist.
+- Wann immer möglich soll ein bestimmter, dem Schwierigkeitsgrad entsprechender Algorithmus abgefragt werden.
 - Gib realistische und nicht überzogene Zeitschätzungen an. Die Zeitschätzung darf auf keinen Fall 0 sein!
 - Es gibt 5 Schwierigkeitsgrade (von super-easy bis super-hard). Beachte zwingend den gewählten Schwierigkeitsgrad!
 
@@ -124,15 +126,17 @@ Goal:
 Bewerte die eingereichte Lösung zu folgender Aufgabe.
 
 Return Format:
-- Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz.
+- Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz. Bitte beachte dabei auch ob KI genutzt wurde.
 - Vergib eine Schulnote von 1,0 (sehr gut) bis 6,0 (ungenüngend). Schritte von 0,1 sind möglich.
 - Vergleich zwischen geschätzter Zeit und benötigter Zeit (realistisch, zu schnell, zu langsam).
+- Eine generierte Lösung.
 - Gib keine Code-Fences an.
 - Exaktes JSON-Format (zwingend im JSON-Format, keine illegalen Zeichen, keinerlei zusätzlichen Text!):
 {
-  "rating": "<Aufgabenbeschreibung>",
+  "rating": "<Bewertung>",
   "mark": "<Schulnote: x,y>",
-  "time_comparison": <Vergleich der Zeiten>
+  "time_comparison": <Vergleich der Zeiten>,
+  "code": <generierte Lösung>
 }
 
 Warnings:

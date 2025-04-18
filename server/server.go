@@ -7,10 +7,18 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/ulule/limiter/v3"
+	ginlimiter "github.com/ulule/limiter/v3/drivers/middleware/gin"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 )
 
 func NewServer() {
 	r := gin.Default()
+
+	rate, _ := limiter.NewRateFromFormatted("10-M")
+	store := memory.NewStore()
+	rateLimiter := ginlimiter.NewMiddleware(limiter.New(store, rate))
+	r.Use(rateLimiter)
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{

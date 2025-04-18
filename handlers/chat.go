@@ -11,10 +11,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func escapeJSON(s string) string {
+	b, _ := json.Marshal(s)
+	return string(b[1 : len(b)-1]) // entfernt Anführungszeichen
+}
+
 func TaskSendChat(c *gin.Context) {
 	var req models.TaskChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		log.Printf("TaskSendChat: ShouldBindJSON error: %v", err)
 		return
 	}
 
@@ -32,8 +38,37 @@ func TaskSendChat(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Speichern der User-Nachricht"})
+		log.Printf("TaskSendChat: Insertion failed: %v", err)
 		return
 	}
+
+	rows, err := database.DB.Query(`
+		SELECT role, content FROM (
+			SELECT id, role, content FROM interactions
+			WHERE task_id = ?
+			ORDER BY id DESC
+			LIMIT 10
+		) ORDER BY id ASC
+	`, req.TaskId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Laden des Chatverlaufs"})
+		log.Printf("TaskSendChat: Query failed: %v", err)
+		return
+	}
+	defer rows.Close()
+
+	var historyJSON = "[\n"
+	first := true
+	for rows.Next() {
+		var role, content string
+		rows.Scan(&role, &content)
+		if !first {
+			historyJSON += ",\n"
+		}
+		first = false
+		historyJSON += fmt.Sprintf(`  { "role": "%s", "content": "%s" }`, escapeJSON(role), escapeJSON(content))
+	}
+	historyJSON += "\n]"
 
 	prompt := fmt.Sprintf(`
 Goal:
@@ -48,18 +83,21 @@ Return Format:
 Warnings:
 - Stelle sicher, dass deine Antwort dem Level der Aufgabe entspricht.
 - Stelle sicher, dass deine Antwort zur Aufgabenstellung passt.
-- Stelle sicher, dass deine Antwort nicht die Lösung enthält, dass darf nur ignoriert werden wenn EXPLIZIT nach der Lösung gefragt wird.
+- Stelle sicher, dass deine Antwort nicht die Lösung enthält, das darf nur ignoriert werden wenn EXPLIZIT nach der Lösung gefragt wird.
 - Sollte die Nachricht nicht zum Thema Programmieren passen, antworte bitte mit "Diese Nachricht passt nicht zum Thema. Ich kann nur themenbezogene Nachrichten beantworten.". Sei hierbei aber nicht zu streng!
 
 Context Dump:
-- Nachricht: "%s";
-- Schwierigkeitsgrad: "%s";
+- Vorherige Konversation: %s
+- Aktuelle Nachricht: "%s"
+- Schwierigkeitsgrad: "%s"
 - Aufgabe: "%s"
-`, req.Message, req.Level, req.Task)
+`, historyJSON, req.Message, req.Level, req.Task)
 
 	response, err := GetAIResponse(prompt)
+	log.Printf("TaskSendChat: Prompt: %v", prompt)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Kontaktieren der KI"})
+		log.Printf("TaskSendChat: GetAIResponse error: %v", err)
 		return
 	}
 

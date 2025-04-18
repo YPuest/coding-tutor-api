@@ -303,7 +303,7 @@ func GetSingleTask(c *gin.Context) {
 
 	err := database.DB.Get(&task, `
 		SELECT
-			tasks.id, tasks.description, tasks.language, 
+			tasks.id, tasks.description, tasks.language, tasks.level,
 			COALESCE(solutions.mark, NULL) as mark,
 			COALESCE(solutions.rating, 'Keine Bewertung') as rating, 
 			COALESCE(solutions.time_spent, 0) as time_spent, 

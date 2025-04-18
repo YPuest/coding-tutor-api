@@ -47,6 +47,7 @@ type Tasks []struct {
 type Task struct {
 	ID            int               `json:"id" db:"id"`
 	Description   string            `json:"description" db:"description"`
+	Level         string            `json:"level" db:"level"`
 	Language      string            `json:"language" db:"language"`
 	Mark          *float64          `json:"mark" db:"mark"`
 	Rating        *string           `json:"rating" db:"rating"`

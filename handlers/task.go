@@ -24,7 +24,9 @@ func GenerateTask(c *gin.Context) {
 
 	prompt := fmt.Sprintf(`
 Goal:
-Erstelle eine klar formulierte Programmieraufgabe für Studierende.
+Erstelle eine klar formulierte, praxisnahe Programmieraufgabe für Studierende mit abwechslungsreichem Einstieg. 
+Nutze unterschiedliche Szenarien oder Anwendungsbeispiele (z. B. Spiel, Alltag, Wissenschaft, Web, Textverarbeitung).
+Die Aufgabe soll sich nicht wie eine Standardformulierung anfühlen.
 
 Return Format:
 - Präzise Aufgabenstellung (max. 150 Wörter).
@@ -36,12 +38,12 @@ Return Format:
   "time_estimation_minutes": <geschätzte Zeit als Zahl>
 }
 
-Warnings:
+Instructions:
+- Verwende für den Einstieg kreative Kontexte, damit sich Aufgaben unterschiedlich anfühlen.
 - Stelle sicher, dass die Aufgabe nur mit Standardbibliotheken lösbar ist.
-- Stelle sicher, dass die Aufgabe in einer einzigen Date lösbar ist.
-- Wann immer möglich soll ein bestimmter, dem Schwierigkeitsgrad entsprechender Algorithmus abgefragt werden.
+- Stelle sicher, dass die Aufgabe in einer einzigen Datei lösbar ist.
+- Wann immer möglich, soll ein bestimmter, dem Schwierigkeitsgrad entsprechender Algorithmus abgefragt werden.
 - Gib realistische und nicht überzogene Zeitschätzungen an. Die Zeitschätzung darf auf keinen Fall 0 sein!
-- Es gibt 5 Schwierigkeitsgrade (von super-easy bis super-hard). Beachte zwingend den gewählten Schwierigkeitsgrad!
 
 Context Dump:
 - Programmiersprache: "%s";
@@ -126,14 +128,18 @@ Goal:
 Bewerte die eingereichte Lösung zu folgender Aufgabe.
 
 Return Format:
-- Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz. Bitte beachte dabei auch ob KI genutzt wurde.
-- Vergib eine Schulnote von 1,0 (sehr gut) bis 6,0 (ungenüngend). Schritte von 0,1 sind möglich.
+- Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz. Bitte beachte, ob KI genutzt wurde.
+- Bewerte explizit, ob die Lösung stark an eine typische KI-Lösung erinnert und gib ggf. einen kurzen Hinweis dazu.
+- Formuliere die Bewertung motivierend und konstruktiv, auch wenn es Schwächen gibt.
+- Gib am Ende einen kurzen Verbesserungsvorschlag ("Tipp") – maximal ein Satz.
+- Vergib eine Schulnote von 1,0 (sehr gut) bis 6,0 (ungenügend). Schritte von 0,1 sind möglich.
+- Gib in der Bewertung eine Begründung für diese Note an.
 - Vergleich zwischen geschätzter Zeit und benötigter Zeit (realistisch, zu schnell, zu langsam).
-- Generiere eine mögliche und gültige Lösung die als Code ausführbar ist.
+- Generiere eine mögliche und gültige Lösung, die als Code ausführbar ist.
 - Gib keine Code-Fences an.
 - Exaktes JSON-Format (zwingend im JSON-Format, keine illegalen Zeichen, keinerlei zusätzlichen Text!):
 {
-  "rating": "<Bewertung>",
+  "rating": "<Bewertung mit Hinweis und Verbesserungsvorschlag>",
   "mark": "<Schulnote: x,y>",
   "time_comparison": <Vergleich der Zeiten>,
   "solution": <generierte Lösung>
@@ -141,7 +147,7 @@ Return Format:
 
 Warnings:
 - Gib objektive und realistische Bewertungen.
-- Es gibt 5 Schwierigkeitsgrade (von super-easy bis super-hard). Beachte zwingend den gewählten Schwierigkeitsgrad!
+- Beachte den Schwierigkeitsgrad (super-easy bis super-hard).
 
 Context Dump:
 - Aufgabe: "%s";

@@ -129,11 +129,11 @@ Bewerte die eingereichte Lösung zu folgender Aufgabe.
 
 Return Format:
 - Eine kurze Bewertung hinsichtlich Codequalität, Lesbarkeit und Effizienz. Bitte beachte, ob KI genutzt wurde.
-- Bewerte explizit, ob die Lösung stark an eine typische KI-Lösung erinnert und gib ggf. einen kurzen Hinweis dazu.
+- Bewerte explizit, ob die Lösung einer Musterlösung nahe kommt.
 - Formuliere die Bewertung motivierend und konstruktiv, auch wenn es Schwächen gibt.
 - Gib am Ende einen kurzen Verbesserungsvorschlag ("Tipp") – maximal ein Satz.
 - Vergib eine Schulnote von 1,0 (sehr gut) bis 6,0 (ungenügend). Schritte von 0,1 sind möglich.
-- Gib in der Bewertung eine Begründung für diese Note an.
+- Begründe in der Bewertung, weshalb du diese Note vergeben hast.
 - Vergleich zwischen geschätzter Zeit und benötigter Zeit (realistisch, zu schnell, zu langsam).
 - Generiere eine mögliche und gültige Lösung, die als Code ausführbar ist.
 - Gib keine Code-Fences an.

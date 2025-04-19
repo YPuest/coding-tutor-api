@@ -148,6 +148,7 @@ Return Format:
 Warnings:
 - Gib objektive und realistische Bewertungen.
 - Beachte den Schwierigkeitsgrad (super-easy bis super-hard).
+- Wenn die eingereichte Lösung einer Musterlösung entspricht muss die Note mindestens eine 1,3 sein.
 
 Context Dump:
 - Aufgabe: "%s";
